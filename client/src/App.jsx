@@ -22,9 +22,13 @@ function App() {
   }, []);
 
   const deleteProduct = async (id) => {
-    await axios.delete(`http://localhost:4001/products/${id}`);
-    const newResponse = productData.filter((product) => product.id !== id);
-    setProductData(newResponse);
+    try {
+      await axios.delete(`http://localhost:4001/products/${id}`);
+      const newResponse = productData.filter((product) => product.id !== id);
+      setProductData(newResponse);
+    } catch (error) {
+      setLoadingStatus(error);
+    }
   };
 
   return (
@@ -34,10 +38,11 @@ function App() {
       </div>
       {loadingStatus === "loading" && <h1>Loading...</h1>}
       {loadingStatus === "failed" && <h1>Fetching Error...</h1>}
+      {loadingStatus === "error" && <h1>"Failed to delete product..."</h1>}
       {loadingStatus === "complete" &&
         productData.map((product) => {
           return (
-            <div className="product-list">
+            <div className="product-list" key={product.id}>
               <div className="product">
                 <div className="product-preview">
                   <img
@@ -63,6 +68,9 @@ function App() {
             </div>
           );
         })}
+      {loadingStatus === "complete" && !productData.length && (
+        <h1>No product found...</h1>
+      )}
     </div>
   );
 }
